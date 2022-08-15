@@ -6,11 +6,25 @@
 //
 
 import UIKit
+import Combine
 
 class ViewController: UIViewController, UNUserNotificationCenterDelegate {
-
+    @IBOutlet weak var statusLabel: UILabel!
+    var walkingRecordingSubscriber: AnyCancellable?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        walkingRecordingSubscriber = WalkBgManager.shared.statusChangedPublisher.sink{ value in
+            DispatchQueue.main.async {
+                self.statusLabel.text = value
+            }
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        walkingRecordingSubscriber?.cancel()
+        walkingRecordingSubscriber = nil
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
